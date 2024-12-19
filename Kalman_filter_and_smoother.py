@@ -57,6 +57,9 @@ print(date_range)
 
 #### Improved method, returns a dictionary of dictionaries. ###
 
+# Initialize an empty DataFrame to store all smoothed factors
+smoothed_factors_df = pd.DataFrame(columns=["Global_Date", "Factor_Date", "Factor_Values"])
+
 # For each month in the date range
 for current_date in date_range:
     # Convert the current_date into an index range for vintage_data
@@ -123,6 +126,17 @@ for current_date in date_range:
     for i, factor in enumerate(F_smoothed_array):
         smoothed_factors_dict[current_date][vintage_data_subset.index[i]] = factor
 
+    # Store the smoothed factors with their corresponding dates in the DataFrame
+    for i, factor in enumerate(F_smoothed_array):
+        smoothed_factors_df = pd.concat([
+            smoothed_factors_df,
+            pd.DataFrame({
+                "Global_Date": [current_date],
+                "Factor_Date": [vintage_data_subset.index[i]],
+                "Factor_Values": [factor]
+            })
+        ], ignore_index=True)
+
     # Update global state variables for the next iteration
     F_t_prev_global = F_t  # Final latent factors from this iteration
     P_t_prev_global = P_t  # Final covariance matrix from this iteration
@@ -132,6 +146,10 @@ for current_date in date_range:
     for date, factor in smoothed_factors_dict[current_date].items():
         print(f"{date}: {factor}")
     print("-" * 50)  # Separator for readability
+
+# Save the DataFrame to a CSV file
+smoothed_factors_df.to_csv("smoothed_factors.csv", index=False)
+print("Smoothed factors saved to smoothed_factors.csv.")
 
 ############### THIS METHOD WORKS!!! ###################à
 # # For each month in the date range
